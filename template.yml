@@ -1,0 +1,77 @@
+parameters:
+  name: Falcon_7B
+  vmImage: 'ubuntu-22.04'
+  hf_model_vendor: tiiuae
+  hf_model_name: falcon-7b
+
+jobs:
+- job: ${{ parameters.name }}
+  timeoutInMinutes: 360
+  
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+    
+  steps: 
+  
+  - bash: |
+       sudo apt-get update && \
+       sudo apt-get -y install libopenblas-dev
+    displayName: 'Install OpenBLAS library'
+
+  - bash : |
+       git clone https://github.com/ggerganov/llama.cpp.git
+    displayName: 'Clone llama.cpp git repository'
+
+  - bash : |
+       cd llama.cpp && \
+       make -j2 LLAMA_OPENBLAS=1
+    displayName: 'Build llama.cpp'
+
+  - bash: |
+       pip install numpy sentencepiece beautifulsoup4
+    displayName: 'Install python requirements'
+
+  # using git+lfs for downloading hf model files is not a good solution,
+  # wget is better
+  - bash : |
+       mkdir model && \
+       python get-model-files.py --model_path ${{ parameters.hf_model_vendor }}/${{ parameters.hf_model_name }} && \
+       ls ./model
+    displayName: 'Download the model files from HuggingFace hub'
+
+  - bash : |
+       cd llama.cpp && \
+       python3 convert.py ../model && \
+       ls ../model
+    displayName: 'Convert model to ggml fp16 format'
+
+  - bash : |
+       rm ./model/pytorch*.bin
+       rm ./model/tokenizer.model
+    displayName: 'Remove pytorch .bin files, no need for them anymore'
+
+  - bash : |
+       cd llama.cpp && \
+       ./quantize ../model/ggml-model-f16.bin ../model/ggml-model-q4_0.bin q4_0
+    displayName: 'Quantize model to Q4_0'
+
+  - bash : |
+       rm ./model/ggml-model-f16.bin && \
+       ls -l ./model
+    displayName: 'Remove ggml-f16 file'
+
+  - bash : |
+       cd llama.cpp && \
+       ./main -m ../model/ggml-model-q4_0.bin -n 256 --repeat_penalty 1.0 --color -r "User:" -f prompts/chat-with-bob.txt
+    displayName: 'Infer quantized model'
+
+  - bash : |
+      cd llama.cpp && \
+      ./perplexity -m ../model/ggml-model-q4_0.bin -f ../reduced_wikitext-2-raw/wiki.test.raw --export
+    displayName: 'Compute perplexity on small wikitext-2 dataset'
+
+  - task: PublishPipelineArtifact@0
+    inputs:
+      targetPath: '/home/vsts/work/1/s/model/'
+      artifactName: Quantized Q4_0 model ${{ parameters.hf_model_vendor }}/${{ parameters.hf_model_name }}
+    displayName: 'Publish the quantized Q4_0 artifact'

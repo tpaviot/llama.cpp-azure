@@ -1,0 +1,21 @@
+jobs:
+- template: template.yml
+  parameters:
+    name: OpenLLama_7b_v2
+    vmImage: 'ubuntu-22.04'
+    hf_model_vendor: openlm-research
+    hf_model_name: open_llama_7b_v2
+
+- template: template.yml
+  parameters:
+    name: huggyllama_llama_7b
+    vmImage: 'ubuntu-22.04'
+    hf_model_vendor: huggyllama
+    hf_model_name: llama-7b
+
+- template: template.yml
+  parameters:
+    name: Vigogne_7b_instruct
+    vmImage: 'ubuntu-22.04'
+    hf_model_vendor: bofenghuang
+    hf_model_name: vigogne-7b-instruct
