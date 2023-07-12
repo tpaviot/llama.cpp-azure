@@ -8,10 +8,10 @@ jobs:
 
 - template: template.yml
   parameters:
-    name: huggyllama_llama_7b
+    name: Vicuna_7b_v1_3
     vmImage: 'ubuntu-22.04'
-    hf_model_vendor: huggyllama
-    hf_model_name: llama-7b
+    hf_model_vendor: lmsys
+    hf_model_name: vicuna-7b-v1.3
 
 - template: template.yml
   parameters:

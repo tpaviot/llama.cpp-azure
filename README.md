@@ -15,7 +15,7 @@ This is an ongoing work towards continuous integration of llama.cpp and/or quant
 - Test inference of quantized model
 - Test perplexity computation on a small subset of wikitext-2
 - Q4_0 model available for download as an azure artifact
-- 3 models currently tested: [open_llama_7b_v2](https://huggingface.co/openlm-research/open_llama_7b_v2), [huggyllama llama_7b](https://huggingface.co/huggyllama/llama-7b) and [vigogne-7b-instruct](https://huggingface.co/bofenghuang/vigogne-7b-instruct)
+- 3 models currently tested: [open_llama_7b_v2](https://huggingface.co/openlm-research/open_llama_7b_v2), [Vicuna-7b](https://huggingface.co/lmsys/vicuna-7b-v1.3) and [vigogne-7b-instruct](https://huggingface.co/bofenghuang/vigogne-7b-instruct)
 
 **Known limitations/issues:**
 
