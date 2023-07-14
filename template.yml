@@ -1,8 +1,6 @@
 parameters:
-  name: Falcon_7B
+  name: Linux
   vmImage: 'ubuntu-22.04'
-  hf_model_vendor: tiiuae
-  hf_model_name: falcon-7b
 
 jobs:
 - job: ${{ parameters.name }}
@@ -14,64 +12,64 @@ jobs:
   steps: 
   
   - bash: |
-       sudo apt-get update && \
-       sudo apt-get -y install libopenblas-dev
+      sudo apt-get update && \
+      sudo apt-get -y install libopenblas-dev ninja-build
     displayName: 'Install OpenBLAS library'
 
   - bash : |
-       git clone https://github.com/ggerganov/llama.cpp.git
+      git clone https://github.com/ggerganov/llama.cpp.git
     displayName: 'Clone llama.cpp git repository'
 
   - bash : |
-       cd llama.cpp && \
-       make -j2 LLAMA_OPENBLAS=1
-    displayName: 'Build llama.cpp'
+      cd llama.cpp && \
+      mkdir cmake-build && \
+      cd cmake-build && \
+      cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON  -DLLAMA_BLAS_VENDOR=OpenBLAS -G Ninja .. && \
+      ninja
+    displayName: 'Build llama.cpp using ninja'
 
   - bash: |
-       pip install numpy sentencepiece beautifulsoup4
+      cd llama.cpp && \
+      pip install -r requirements.txt
     displayName: 'Install python requirements'
 
-  # using git+lfs for downloading hf model files is not a good solution,
-  # wget is better
   - bash : |
-       mkdir model && \
-       python get-model-files.py --model_path ${{ parameters.hf_model_vendor }}/${{ parameters.hf_model_name }} && \
-       ls ./model
-    displayName: 'Download the model files from HuggingFace hub'
-
-  - bash : |
-       cd llama.cpp && \
-       python3 convert.py ../model && \
-       ls ../model
-    displayName: 'Convert model to ggml fp16 format'
-
-  - bash : |
-       rm ./model/pytorch*.bin
-       rm ./model/tokenizer.model
-    displayName: 'Remove pytorch .bin files, no need for them anymore'
-
-  - bash : |
-       cd llama.cpp && \
-       ./quantize ../model/ggml-model-f16.bin ../model/ggml-model-q4_0.bin q4_0
-    displayName: 'Quantize model to Q4_0'
-
-  - bash : |
-       rm ./model/ggml-model-f16.bin && \
-       ls -l ./model
-    displayName: 'Remove ggml-f16 file'
-
-  - bash : |
-       cd llama.cpp && \
-       ./main -m ../model/ggml-model-q4_0.bin -n 256 --repeat_penalty 1.0 --color -r "User:" -f prompts/chat-with-bob.txt
-    displayName: 'Infer quantized model'
+      mkdir model && \
+      wget -q -O ./model/pytorch_model.bin https://huggingface.co/openlm-research/open_llama_3b/resolve/main/pytorch_model.bin && \
+      wget -q -O ./model/tokenizer.model https://huggingface.co/openlm-research/open_llama_3b/resolve/main/tokenizer.model && \
+      ls ./model
+    displayName: 'Download OpenLLama-3b'
 
   - bash : |
       cd llama.cpp && \
-      ./perplexity -m ../model/ggml-model-q4_0.bin -f ../reduced_wikitext-2-raw/wiki.test.raw --export
-    displayName: 'Compute perplexity on small wikitext-2 dataset'
+      python3 convert.py ../model && \
+      ls ../model
+    displayName: 'Test convert model to ggml F16 format'
 
-  - task: PublishPipelineArtifact@0
-    inputs:
-      targetPath: '/home/vsts/work/1/s/model/'
-      artifactName: Quantized Q4_0 model ${{ parameters.hf_model_vendor }}/${{ parameters.hf_model_name }}
-    displayName: 'Publish the quantized Q4_0 artifact'
+  - bash : |
+      rm ./model/pytorch*.bin
+      rm ./model/tokenizer.model
+    displayName: 'Remove model files, no need for them anymore'
+
+  - bash : |
+      ./llama.cpp/cmake-build/bin/quantize ./model/ggml-model-f16.bin ./model/ggml-model-q4_0.bin q4_0
+    displayName: 'Test quantize model to Q4_0'
+
+  - bash : |
+      rm ./model/*
+    displayName: 'Remove ggml-f16 file and q4_0 files to save disk space'
+
+  - bash : |
+      wget -q -O ./model/ggml-model-q4_0.bin https://huggingface.co/TheBloke/open-llama-7B-v2-open-instruct-GGML/resolve/main/open-llama-7b-v2-open-instruct.ggmlv3.q4_0.bin && \
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_0.bin -n 256 --repeat_penalty 1.0 --color -r "User:" -f ./llama.cpp/prompts/chat-with-bob.txt
+    displayName: 'Test infer OpenLLama-7b Q4_0 quantized model'
+
+  - bash : |
+      ./llama.cpp/cmake-build/bin/perplexity -m ./model/ggml-model-q4_0.bin -f ./reduced_wikitext-2-raw/wiki.test.raw --export
+    displayName: 'Test compute perplexity on small wikitext-2 dataset'
+
+  # - task: PublishPipelineArtifact@0
+  #   inputs:
+  #     targetPath: '/home/vsts/work/1/s/model/'
+  #     artifactName: Quantized Q4_0 model ${{ parameters.hf_model_vendor }}/${{ parameters.hf_model_name }}
+  #   displayName: 'Publish the quantized Q4_0 artifact'
