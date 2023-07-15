@@ -18,7 +18,7 @@ jobs:
   # on macOs, openblas is alreadey installed
   - ${{ if contains(parameters.vmImage, 'macOs') }}: 
     - bash: |
-        brew install ninja open-mpi
+        brew install ninja open-mpi && \
       displayName: 'Install BLAS and MPI libraries'
 
   - bash : |
@@ -29,7 +29,7 @@ jobs:
       cd llama.cpp && \
       mkdir cmake-build && \
       cd cmake-build && \
-      cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON  -DLLAMA_BLAS_VENDOR=OpenBLAS -G Ninja .. && \
+      cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS export -DCMAKE_PREFIX_PATH="/usr/local/opt/lapack;/usr/local/opt/openblas" -G Ninja .. && \
       ninja
     displayName: 'Build llama.cpp using ninja'
 
