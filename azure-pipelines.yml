@@ -3,3 +3,8 @@ jobs:
   parameters:
     name: Linux
     vmImage: 'ubuntu-22.04'
+
+- template: template.yml
+  parameters:
+    name: MacOS
+    vmImage: 'macOS-13'
