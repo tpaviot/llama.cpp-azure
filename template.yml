@@ -18,7 +18,7 @@ jobs:
   # on macOs, openblas is alreadey installed
   - ${{ if contains(parameters.vmImage, 'macOs') }}: 
     - bash: |
-        brew install ninja open-mpi && \
+        brew install ninja open-mpi
       displayName: 'Install BLAS and MPI libraries'
 
   - bash : |
