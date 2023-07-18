@@ -39,7 +39,7 @@ jobs:
         cd llama.cpp && \
         mkdir cmake-build && \
         cd cmake-build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=Apple -G Ninja .. && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=OFF -G Ninja .. && \
         ninja
       displayName: 'Build llama.cpp using ninja'
 
