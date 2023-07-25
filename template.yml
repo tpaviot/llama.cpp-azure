@@ -35,10 +35,14 @@ jobs:
 
   - bash : |
       mkdir model && \
+      wget -q -O ./model/config.json https://huggingface.co/openlm-research/open_llama_3b_v2/raw/main/config.json && \
+      wget -q -O ./model/tokenizer.model https://huggingface.co/openlm-research/open_llama_3b_v2/resolve/main/tokenizer.model && \
+      wget -q -O ./model/tokenizer_config.json https://huggingface.co/openlm-research/open_llama_3b_v2/raw/main/tokenizer_config.json && \
+      wget -q -O ./model/special_tokens_map.json https://huggingface.co/openlm-research/open_llama_3b_v2/raw/main/special_tokens_map.json && \
+      wget -q -O ./model/generation_config.json https://huggingface.co/openlm-research/open_llama_3b_v2/raw/main/generation_config.json && \
       wget -q -O ./model/pytorch_model.bin https://huggingface.co/openlm-research/open_llama_3b/resolve/main/pytorch_model.bin && \
-      wget -q -O ./model/tokenizer.model https://huggingface.co/openlm-research/open_llama_3b/resolve/main/tokenizer.model && \
       ls ./model
-    displayName: 'Download OpenLLama-3b'
+    displayName: 'Download OpenLLama-3b-v2'
 
   - bash : |
       cd llama.cpp && \
@@ -56,13 +60,18 @@ jobs:
     displayName: 'Test quantize model to Q4_0'
 
   - bash : |
+      wget -q -O ./model/ggml-model-q4_0.bin https://huggingface.co/TheBloke/open-llama-7B-v2-open-instruct-GGML/resolve/main/open-llama-7b-v2-open-instruct.ggmlv3.q4_0.bin && \
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_0.bin -s 1234 -n 64 --ignore-eos -p "I believe the meaning of science is"
+    displayName: 'Test infer OpenLlama-3b-v2 Q4_0 quantized model'
+
+  - bash : |
       rm ./model/*
     displayName: 'Remove ggml-f16 file and q4_0 files to save disk space'
 
   - bash : |
       wget -q -O ./model/ggml-model-q4_0.bin https://huggingface.co/TheBloke/open-llama-7B-v2-open-instruct-GGML/resolve/main/open-llama-7b-v2-open-instruct.ggmlv3.q4_0.bin && \
-      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_0.bin -n 256 --repeat_penalty 1.0 --color -r "User:" -f ./llama.cpp/prompts/chat-with-bob.txt
-    displayName: 'Test infer OpenLLama-7b Q4_0 quantized model'
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_0.bin -s 1234 -n 64 --ignore-eos -p "I believe the meaning of science is"
+    displayName: 'Test infer OpenLLama-7b-v2 Q4_0 quantized model'
 
   - bash : |
       ./llama.cpp/cmake-build/bin/perplexity -m ./model/ggml-model-q4_0.bin -f ./reduced_wikitext-2-raw/wiki.test.raw --export
