@@ -3,3 +3,4 @@ jobs:
   parameters:
     name: Linux
     vmImage: 'ubuntu-22.04'
+    model: 'openlm-research/open_llama_3b_v2'
