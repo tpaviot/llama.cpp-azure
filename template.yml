@@ -41,9 +41,9 @@ jobs:
       wget -q -O ./model/tokenizer_config.json https://huggingface.co/${{ parameters.model }}/raw/main/tokenizer_config.json && \
       wget -q -O ./model/special_tokens_map.json https://huggingface.co/${{ parameters.model }}/raw/main/special_tokens_map.json && \
       wget -q -O ./model/generation_config.json https://huggingface.co/${{ parameters.model }}/raw/main/generation_config.json && \
-      wget -q -O ./model/pytorch_model.bin https://huggingface.co${{ parameters.model }}/resolve/main/pytorch_model.bin && \
+      wget -q -O ./model/pytorch_model.bin https://huggingface.co/${{ parameters.model }}/resolve/main/pytorch_model.bin && \
       ls ./model
-    displayName: 'Download OpenLLama-3b-v2'
+    displayName: 'Download ${{ parameters.model }}'
 
   - bash : |
       cd llama.cpp && \
