@@ -75,6 +75,10 @@ jobs:
     displayName: 'Test infer OpenLLama-7b-v2 Q4_0 quantized model'
 
   - bash : |
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_0.bin -n 256 --grammar-file ./llama.cpp/grammars/json.gbnf -p 'Request: schedule a call at 8pm; Command:'
+    displayName: 'Test infer grammar'
+
+  - bash : |
       ./llama.cpp/cmake-build/bin/perplexity -m ./model/ggml-model-q4_k_m.bin -f ./reduced_wikitext-2-raw/wiki.test.raw --export
     displayName: 'Test compute perplexity on small wikitext-2 dataset'
 
