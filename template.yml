@@ -57,7 +57,7 @@ jobs:
     displayName: 'Remove model files, no need for them anymore'
 
   - bash : |
-      ./llama.cpp/cmake-build/bin/quantize ./model/ggml-model-f16.bin ./model/ggml-model-q4_0.bin q4_0
+      ./llama.cpp/cmake-build/bin/quantize ./model/ggml-model-f16.gguf ./model/ggml-model-q4_0.bin q4_0
     displayName: 'Test quantize model to Q4_0'
 
   - bash : |
