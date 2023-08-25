@@ -61,18 +61,13 @@ jobs:
     displayName: 'Test quantize model to Q4_0'
 
   - bash : |
-      wget -q -O ./model/ggml-model-q4_k_m.gguf https://huggingface.co/TheBloke/CodeLlama-7B-Python-GGUF/resolve/main/codellama-7b-python.Q4_K_M.gguf && \
-      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -s 1234 -n 64 --ignore-eos -p "I believe the meaning of science is"
-    displayName: 'Test infer CodeLlama-7B-Python-GGUF'
-
-  - bash : |
       rm ./model/*
     displayName: 'Remove ggml-f16 file and q4_0 files to save disk space'
 
   - bash : |
-      wget -q -O ./model/ggml-model-q4_k_m.bin https://huggingface.co/TheBloke/Llama-2-7B-GGML/resolve/main/llama-2-7b.ggmlv3.q4_K_M.bin && \
-      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -s 1234 -n 64 --ignore-eos -p "I believe the meaning of science is"
-    displayName: 'Test infer OpenLLama-7b-v2 Q4_0 quantized model'
+      wget -q -O ./model/ggml-model-q4_k_m.gguf https://huggingface.co/TheBloke/CodeLlama-7B-Python-GGUF/resolve/main/codellama-7b-python.Q4_K_M.gguf && \
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -n 256 "A python function to find the nth prime number"
+    displayName: 'Test infer CodeLlama-7B-Python-GGUF'
 
   - bash : |
       ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -n 256 --grammar-file ./llama.cpp/grammars/json.gbnf -p 'Request: schedule a call at 8pm; Command:'
