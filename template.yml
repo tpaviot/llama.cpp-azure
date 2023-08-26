@@ -66,7 +66,7 @@ jobs:
 
   - bash : |
       wget -q -O ./model/ggml-model-q4_k_m.gguf https://huggingface.co/TheBloke/CodeLlama-7B-Python-GGUF/resolve/main/codellama-7b-python.Q4_K_M.gguf && \
-      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -n 256 "A python function to find the nth prime number"
+      ./llama.cpp/cmake-build/bin/main -m ./model/ggml-model-q4_k_m.gguf -p "A python function to find the nth prime number"
     displayName: 'Test infer CodeLlama-7B-Python-GGUF'
 
   - bash : |
