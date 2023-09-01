@@ -80,12 +80,12 @@ jobs:
     displayName: 'Remove model files, no need for them anymore'
 
   - bash : |
-      ./llama.cpp/cmake-build/bin/quantize ./model/ggml-model-f16.gguf ./model/ggml-model-q5_k_m.gguf q5_k_m
-    displayName: 'Test quantize model to Q5_K_M'
+      ./llama.cpp/cmake-build/bin/quantize ./model/ggml-model-f16.gguf ./model/ggml-model-q4_0.gguf q4_0
+    displayName: 'Test quantize model to Q4_0'
 
   - bash : |
       rm ./model/*
-    displayName: 'Remove ggml-f16 file and q5_k_m files to save disk space'
+    displayName: 'Remove ggml-f16 file and q4_0 files to save disk space'
 
   - bash : |
       wget -q -O ./model/ggml-model-q4_k_m.gguf https://huggingface.co/TheBloke/CodeLlama-7B-Python-GGUF/resolve/main/codellama-7b-python.Q4_K_M.gguf && \
