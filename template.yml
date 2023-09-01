@@ -6,32 +6,55 @@ parameters:
 jobs:
 - job: ${{ parameters.name }}
   timeoutInMinutes: 360
-  
+
   pool:
     vmImage: ${{ parameters.vmImage }}
-    
+
   steps: 
-  
-  - bash: |
-      sudo apt-get update && \
-      sudo apt-get -y install libopenblas-dev ninja-build
-    displayName: 'Install OpenBLAS library'
+
+  - ${{ if contains(parameters.vmImage, 'ubuntu') }}: 
+    - bash: |
+        sudo apt-get update && \
+        sudo apt-get -y install libopenblas-dev ninja-build libopenmpi-dev
+      displayName: 'Install BLAS and MPI libraries'
+
+  - ${{ if contains(parameters.vmImage, 'macOs') }}: 
+    - bash: |
+        brew install ninja open-mpi openblas lapack
+      displayName: 'Install BLAS and MPI libraries'
 
   - bash : |
       git clone https://github.com/ggerganov/llama.cpp.git
     displayName: 'Clone llama.cpp git repository'
 
+  - ${{ if contains(parameters.vmImage, 'ubuntu') }}: 
+    - bash : |
+        cd llama.cpp && \
+        mkdir cmake-build && \
+        cd cmake-build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS -G Ninja .. && \
+        ninja
+      displayName: 'Build llama.cpp using ninja on linux'
+
+  - ${{ if contains(parameters.vmImage, 'macOs') }}:
+    - bash : |
+        cd llama.cpp && \
+        mkdir cmake-build && \
+        cd cmake-build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=OFF -G Ninja .. && \
+        ninja
+      displayName: 'Build llama.cpp using ninja on osx'
+
   - bash : |
-      cd llama.cpp && \
-      mkdir cmake-build && \
-      cd cmake-build && \
-      cmake -DCMAKE_BUILD_TYPE=Release -DLLAMA_BLAS=ON  -DLLAMA_BLAS_VENDOR=OpenBLAS -G Ninja .. && \
-      ninja
-    displayName: 'Build llama.cpp using ninja'
+      cd llama.cpp/cmake-build/bin && \
+      ./test-sampling && \
+      ./test-quantize-fns && \
+      ./test-quantize-perf
+    displayName: 'Run basic tests'
 
   - bash: |
       cd llama.cpp && \
-      pip install -r requirements.txt
+      pip3 install -r requirements.txt
     displayName: 'Install python requirements'
 
   - bash : |
