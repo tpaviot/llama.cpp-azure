@@ -4,3 +4,10 @@ jobs:
     name: Linux
     vmImage: 'ubuntu-22.04'
     model: 'openlm-research/open_llama_3b_v2'
+
+
+- template: template.yml
+  parameters:
+    name: MacOS
+    vmImage: 'macOS-13'
+    model: 'openlm-research/open_llama_3b_v2'
